@@ -16,23 +16,16 @@ def mask_largest_contour(input):
         cv2.fillPoly(mask, pts =[c], color=255)
     return mask
 
-
+def intersection_over_union(input, test):
+    input_mask = mask_largest_contour(input)
+    test_mask = mask_largest_contour(test)
+    intersection = cv2.bitwise_and(input_mask,test_mask)
+    union = cv2.bitwise_or(input_mask,test_mask)
+    return cv2.countNonZero(intersection)/cv2.countNonZero(union)
 input_0 = cv2.imread('shapes/piece_0.png')
-input_1 = cv2.imread('shapes/piece_0.png')
-input_0_mask = mask_largest_contour(input_0)
-input_1_mask = mask_largest_contour(input_1)
-intersection = cv2.bitwise_and(input_0_mask,input_1_mask)
-union = cv2.bitwise_or(input_0_mask,input_1_mask)
-print(cv2.countNonZero(intersection))
-print(cv2.countNonZero(union))
-print(cv2.countNonZero(intersection)/cv2.countNonZero(union))
-# cv2.imshow("input_mask_0",input_0_mask)
-# cv2.imshow("input_mask_1",input_1_mask)
-cv2.imshow("intersection",intersection)
-# cv2.waitKey(0)
-cv2.imshow("union",union)
-cv2.waitKey(0)
-cv2.destroyAllWindows() 
+input_1 = cv2.imread('shapes/piece_15.png')
+
+print(intersection_over_union(input_0, input_1))
 # Find contour of input image
 # Loop for 25 images
 #   find centroid for both input and test_shape
