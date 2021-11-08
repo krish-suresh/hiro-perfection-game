@@ -15,12 +15,19 @@ def mask_largest_contour(input, rotation=0):
         c = max(contours, key = cv2.contourArea)
         if rotation != 0:
             c = rotate_contour(c,rotation)
-        cv2.fillPoly(mask, pts =[c], color=255)
+        x,y,w,h = cv2.boundingRect(c)
+        square_size = max(w,h)
+        mask = np.zeros((square_size,square_size), np.uint8)
+        cx = int(w/2)+x
+        cy = int(h/2)+y
+        center = int(square_size/2)
+        cv2.fillPoly(mask, pts =[c], color=255,offset=(-cx+center,-cy+center))
     return mask
 
 def intersection_over_union(input, test, input_rotation):
     input_mask = mask_largest_contour(input, rotation=input_rotation)
     test_mask = mask_largest_contour(test)
+    input_mask = cv2.resize(input_mask, test_mask.shape, interpolation = cv2.INTER_AREA)
     intersection = cv2.bitwise_and(input_mask,test_mask)
     union = cv2.bitwise_or(input_mask,test_mask)
     return cv2.countNonZero(intersection)/cv2.countNonZero(union)
@@ -58,7 +65,7 @@ def rotate_contour(cnt, angle):
 # cv2.imshow('input_rot',input_rot)
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()
-
+# quit()
 input = cv2.imread('piece_13_rot.png')
 print(input.shape)
 num_test_img = 25
