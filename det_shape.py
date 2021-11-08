@@ -13,8 +13,8 @@ while(1):
         break
     hsv = cv2.cvtColor(frame_blur, cv2.COLOR_BGR2HSV)
         
-    lower_yellow = np.array([15,0,0])
-    upper_yellow = np.array([36, 255, 255])
+    lower_yellow = np.array([0,50,50])
+    upper_yellow = np.array([50, 255, 255])
 
     mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
     # output = cv2.bitwise_and(frame,frame, mask= mask)
@@ -29,7 +29,7 @@ while(1):
 
     cv2.imshow('frame',frame)
     # cv2.imshow('frame_blur',frame_blur)
-    # cv2.imshow('mask',mask)
+    cv2.imshow('mask',mask)
     cv2.imshow('output',output)
     k = cv2.waitKey(1)
     if k%256 == 27:

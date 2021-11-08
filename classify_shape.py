@@ -5,8 +5,8 @@ import numpy as np
 def mask_largest_contour(input, rotation=0):
     input_blur = cv2.GaussianBlur(input,(5,5),cv2.BORDER_DEFAULT)
     hsv = cv2.cvtColor(input_blur, cv2.COLOR_BGR2HSV)
-    lower_yellow = np.array([15,0,0])
-    upper_yellow = np.array([36, 255, 255])
+    lower_yellow = np.array([0,50,50])
+    upper_yellow = np.array([50, 255, 255])
     mask_all = cv2.inRange(hsv, lower_yellow, upper_yellow)
     ret,thresh = cv2.threshold(mask_all, 40, 255, 0)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
@@ -66,21 +66,25 @@ def rotate_contour(cnt, angle):
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()
 # quit()
+
+def classify(input):
+    num_test_img = 25
+    degree_increment = 10
+    best_fit_test = (0,0) # (shape_num, deg)
+    max_iou = 0
+    for i in range(num_test_img):
+        test_image = cv2.imread(f'shapes/piece_{i}.png')
+        # TODO centroid centering
+        for deg in np.linspace(0,270, degree_increment):
+            iou = intersection_over_union(input, test_image, deg)
+            if  iou > max_iou:
+                best_fit_test = (i,deg)
+                max_iou = iou
+    return best_fit_test
+
 input = cv2.imread('piece_13_rot.png')
 print(input.shape)
-num_test_img = 25
-degree_increment = 10
-best_fit_test = (0,0) # (shape_num, deg)
-max_iou = 0
-for i in range(num_test_img):
-    test_image = cv2.imread(f'shapes/piece_{i}.png')
-    # TODO centroid centering
-    for deg in np.linspace(0,270, degree_increment):
-        iou = intersection_over_union(input, test_image, deg)
-        if  iou > max_iou:
-            best_fit_test = (i,deg)
-            max_iou = iou
-print(best_fit_test)
+print(classify(input))
 # Find contour of input image
 # Loop for 25 images
 #   find centroid for both input and test_shape
