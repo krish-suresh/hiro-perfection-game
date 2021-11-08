@@ -13,7 +13,7 @@ while(1):
         predicted_shape_picture = cv2.imread(f'shapes/piece_{predicted_shape[0]}.png')
         prev_shape = predicted_shape[0]
 
-    print(predicted_shape)
+    print(f"Piece {predicted_shape[0]} rotated by {predicted_shape[1]} degrees")
     cv2.imshow('frame',frame)
     cv2.imshow('shape', predicted_shape_picture)
     k = cv2.waitKey(1)

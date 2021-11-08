@@ -74,7 +74,6 @@ def classify(input):
     max_iou = 0
     for i in range(num_test_img):
         test_image = cv2.imread(f'shapes/piece_{i}.png')
-        # TODO centroid centering
         for deg in np.linspace(0,270, degree_increment):
             iou = intersection_over_union(input, test_image, deg)
             if  iou > max_iou:
