@@ -76,3 +76,5 @@ cv2.destroyAllWindows()
 #       find intersection between input and test_shape - size of bitwise and
 #       find union between input and test_shape - size of bitwise or
 #       if iou is greater than last max store save rotation and shape as best fit
+
+# https://github.com/timfeirg/Fourier-Descriptors/blob/master/FourierDescriptor.py
