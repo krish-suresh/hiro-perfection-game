@@ -15,37 +15,55 @@ def get_largest_contour(input):
         c = max(contours, key = cv2.contourArea)
         cv2.fillPoly(mask, pts =[c], color=255)
     return mask, c
+def get_distances_to_centroid(contour):
+    M = cv2.moments(contour)
+    cx = int(M['m10']/M['m00'])
+    cy = int(M['m01']/M['m00'])
+    dists = []
+    for point in contour.squeeze():
+        dists.append(cv2.norm(point-(cx,cy)))
+    return dists
 
-input = cv2.imread('shapes/piece_13.png')
+input = cv2.imread('shapes/piece_5.png')
 input_mask,contour = get_largest_contour(input)
-print(contour.squeeze().shape)
-M = cv2.moments(contour)
-cx = int(M['m10']/M['m00'])
-cy = int(M['m01']/M['m00'])
-input = cv2.circle(input, (cx,cy), radius=4, color=(0, 0, 255), thickness=-1)
-dists = []
-for point in contour.squeeze():
-    input = cv2.circle(input, point, radius=0, color=(0, 0, 255), thickness=-1)
-    dists.append(cv2.norm(point-(cx,cy)))
-
-input = cv2.imread('piece_13_rot.png')
-input_mask,contour = get_largest_contour(input)
-print(contour.squeeze().shape)
-M = cv2.moments(contour)
-cx = int(M['m10']/M['m00'])
-cy = int(M['m01']/M['m00'])
-input = cv2.circle(input, (cx,cy), radius=4, color=(0, 0, 255), thickness=-1)
-dists_rot = []
-for point in contour.squeeze():
-    input = cv2.circle(input, point, radius=0, color=(0, 0, 255), thickness=-1)
-    dists_rot.append(cv2.norm(point-(cx,cy)))
-plt.plot(dists)
-plt.plot(dists_rot)
-plt.show()
+contour_array = contour[:, 0, :]
+contour_complex = np.empty(contour_array.shape[:-1], dtype=complex)
+contour_complex.real = contour_array[:, 0]
+contour_complex.imag = contour_array[:, 1]
+fourier_result = np.fft.fft(contour_complex)
+centered_fourier = np.fft.fftshift(fourier_result)
+center_index = int(len(centered_fourier) / 2)
+degree = 100
+center_range = centered_fourier[int(center_index - degree / 2):int(center_index + degree / 2)]
+truncated_fourier = np.fft.ifftshift(center_range)
+contour_reconstruct = np.fft.ifft(truncated_fourier)
+contour_reconstruct = np.array(
+    [contour_reconstruct.real, contour_reconstruct.imag])
+contour_reconstruct = np.transpose(contour_reconstruct)
+contour_reconstruct = np.expand_dims(contour_reconstruct, axis=1)
+# make positive
+if contour_reconstruct.min() < 0:
+    contour_reconstruct -= contour_reconstruct.min()
+# normalization
+contour_reconstruct *= 800 / contour_reconstruct.max()
+# type cast to int32
+contour_reconstruct = contour_reconstruct.astype(np.int32, copy=False)
+print(contour_reconstruct)
+black = np.zeros((800,800), np.uint8)
+# draw and visualize
+cv2.fillPoly(black, pts =[contour_reconstruct], color=255)
+cv2.imshow("input", input)
+cv2.imshow("black", black)
+# plt.plot(get_distances_to_centroid(contour))
+# plt.plot(get_distances_to_centroid(contour_rot))
+# plt.show()
+# plt.plot(truncated_fourier)
+# plt.plot(contour_rot_fft)
+# plt.show()
 # cv2.imshow('input',input)
 # cv2.imshow('input_rot',input_mask)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 # quit()
 
 
