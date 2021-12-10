@@ -7,15 +7,18 @@ import random
 
 class MovingPieces:
     def __init__(self):
-        self.robot = XamyabRobot(visualize_trajectory=False)
+        self.robot = XamyabRobot(visualize_trajectory=True)
         self.default_gripper_quaternion = Quaternion(*quaternion_from_euler(pi, 0, pi/2))
         self.viewing_gripper_quaternion = Quaternion(*quaternion_from_euler(-pi/2, 0, pi/2))
         self.default_pos = Pose(position=Point(*[0.6256, 0.50, 0.2]), orientation=self.default_gripper_quaternion)
     def run(self, j):
-        self.reset()
+        #self.reset()
         rospy.loginfo("PROJECT READY")
         for i in range(0,j):
             self.move_object(i)
+    def test(self):
+        rospy.loginfo("CLOSING GRIPPER 75%")
+        self.robot.right_gripper.set_value(75)
     def reset(self):
         self.robot.right_gripper.open()
         rospy.loginfo("Going home")
@@ -68,4 +71,5 @@ class MovingPieces:
 
 if __name__ == '__main__':
     project = MovingPieces()
-    project.run(2)
+    #project.run(2)
+    project.test()
