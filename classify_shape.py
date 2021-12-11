@@ -2,12 +2,10 @@ import cv2
 import numpy as np
 
 
-def mask_largest_contour(input, rotation=0):
+def mask_largest_contour(input, hsv_low, hsv_high, rotation=0):
     input_blur = cv2.GaussianBlur(input,(5,5),cv2.BORDER_DEFAULT)
     hsv = cv2.cvtColor(input_blur, cv2.COLOR_BGR2HSV)
-    lower_yellow = np.array([0,50,50])
-    upper_yellow = np.array([50, 255, 255])
-    mask_all = cv2.inRange(hsv, lower_yellow, upper_yellow)
+    mask_all = cv2.inRange(hsv, hsv_low, hsv_high)
     ret,thresh = cv2.threshold(mask_all, 40, 255, 0)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     mask = np.zeros(input.shape[0:2], np.uint8)
@@ -25,12 +23,14 @@ def mask_largest_contour(input, rotation=0):
     return mask
 
 def intersection_over_union(input, test, input_rotation):
-    input_mask = mask_largest_contour(input, rotation=input_rotation)
-    test_mask = mask_largest_contour(test)
+    lower_yellow = np.array([0,50,50])
+    upper_yellow = np.array([50, 255, 255])
+    input_mask = mask_largest_contour(input,lower_yellow, upper_yellow, rotation=input_rotation)
+    test_mask = mask_largest_contour(test,lower_yellow, upper_yellow)
     input_mask = cv2.resize(input_mask, test_mask.shape, interpolation = cv2.INTER_AREA)
     intersection = cv2.bitwise_and(input_mask,test_mask)
     union = cv2.bitwise_or(input_mask,test_mask)
-    return cv2.countNonZero(intersection)/cv2.countNonZero(union)
+    return float(cv2.countNonZero(intersection))/float(cv2.countNonZero(union))
 
 def cart2pol(x, y):
     theta = np.arctan2(y, x)
@@ -60,7 +60,9 @@ def rotate_contour(cnt, angle):
     cnt_rotated = cnt_rotated.astype(np.int32)
     return cnt_rotated
 # input = cv2.imread('shapes/piece_0.png')
-# input_rot = mask_largest_contour(input, rotation=30)
+# lower_yellow = np.array([0,50,50])
+# upper_yellow = np.array([50, 255, 255])
+# input_rot = mask_largest_contour(input,lower_yellow, upper_yellow)
 # cv2.imshow('input',input)
 # cv2.imshow('input_rot',input_rot)
 # cv2.waitKey(0)
@@ -73,23 +75,14 @@ def classify(input):
     best_fit_test = (0,0) # (shape_num, deg)
     max_iou = 0
     for i in range(num_test_img):
-        test_image = cv2.imread(f'shapes/piece_{i}.png')
-        for deg in np.linspace(0,270, degree_increment):
+        test_image = cv2.imread('shapes/piece_{}.png'.format(i))
+        for deg in np.linspace(0,360, degree_increment):
             iou = intersection_over_union(input, test_image, deg)
             if  iou > max_iou:
                 best_fit_test = (i,deg)
                 max_iou = iou
     return best_fit_test
 
-input = cv2.imread('piece_13_rot.png')
-print(input.shape)
-print(classify(input))
-# Find contour of input image
-# Loop for 25 images
-#   find centroid for both input and test_shape
-#   shift mask so centroid of input and test_shape is at center of image
-#   Loop for rotations
-#       rotate input mask by rotation val
-#       find intersection between input and test_shape - size of bitwise and
-#       find union between input and test_shape - size of bitwise or
-#       if iou is greater than last max store save rotation and shape as best fit
+# input = cv2.imread('piece_13_rot.png')
+# print(input.shape)
+# print(classify(input))

@@ -10,10 +10,9 @@ while(1):
     ret, frame = cam.read()
     predicted_shape = classify_shape.classify(frame)
     if predicted_shape[0] != prev_shape:
-        predicted_shape_picture = cv2.imread(f'shapes/piece_{predicted_shape[0]}.png')
+        predicted_shape_picture = cv2.imread('shapes/piece_{}.png'.format(predicted_shape[0]))
         prev_shape = predicted_shape[0]
-
-    print(f"Piece {predicted_shape[0]} rotated by {predicted_shape[1]} degrees")
+        print("Piece {} rotated by {} degrees".format(predicted_shape[0],predicted_shape[1]))
     cv2.imshow('frame',frame)
     cv2.imshow('shape', predicted_shape_picture)
     k = cv2.waitKey(1)
