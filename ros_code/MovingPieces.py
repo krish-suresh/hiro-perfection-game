@@ -70,6 +70,9 @@ class MovingPieces:
         pose_goal.orientation = self.viewing_gripper_quaternion
         self.robot.right_manipulator.set_pose_goal(pose_goal)
     def current_pos(self):
+        transform_point = [0.7, -0.7, 0.4]
+        pose = Pose(position=Point(*transform_point))
+        self.move_to(pose)
         print(self.robot.right_manipulator.get_current_pose())
 
 if __name__ == '__main__':
