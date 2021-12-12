@@ -28,6 +28,7 @@ class MovingPieces:
         pose_goal.orientation = self.default_gripper_quaternion
         self.robot.right_manipulator.set_pose_goal(pose_goal)
     def move_object(self,i):
+        
         pose = self.pick_square_piece_pose(i)
         rospy.loginfo("Grabbing Object Number #" + str(i))
         self.move_to(pose)
@@ -68,8 +69,11 @@ class MovingPieces:
         pose_goal.position.z +=0.2
         pose_goal.orientation = self.viewing_gripper_quaternion
         self.robot.right_manipulator.set_pose_goal(pose_goal)
+    def current_pos(self):
+        print(self.robot.right_manipulator.get_current_pose())
 
 if __name__ == '__main__':
     project = MovingPieces()
     #project.run(2)
-    project.test()
+    #project.test()
+    project.current_pos()
