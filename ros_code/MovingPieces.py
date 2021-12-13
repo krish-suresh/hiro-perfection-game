@@ -29,10 +29,11 @@ class MovingPieces:
         rospy.loginfo("Going home")
         self.robot.right_manipulator.home()
     def move_to(self, pose_goal):
-        pose_goal.position.z +=0.2
+        pose_goal.position.z +=0
         pose_goal.orientation = self.default_gripper_quaternion
         self.robot.right_manipulator.set_pose_goal(pose_goal)
     def move_object(self,i):
+        
         pose = self.pick_square_piece_pose(i)
         rospy.loginfo("Grabbing Object Number #" + str(i))
         self.move_to(pose)
@@ -73,11 +74,17 @@ class MovingPieces:
     def move_to_cv(self):
         transform_point = [0.7, 0, 0.5]
         pose_goal  = Pose(position = Point(*transform_point))
-        pose_goal.position.z +=0.2
+        pose_goal.position.z +=0
         pose_goal.orientation = self.viewing_gripper_quaternion
         self.robot.right_manipulator.set_pose_goal(pose_goal)
+    def current_pos(self):
+        transform_point = [0.7, -0.1, 0.4]
+        pose = Pose(position=Point(*transform_point))
+        self.move_to(pose)
+        print(self.robot.right_manipulator.get_current_pose())
 
 if __name__ == '__main__':
     project = MovingPieces()
     #project.run(2)
-    project.test()
+    #project.test()
+    project.current_pos()
