@@ -4,9 +4,14 @@ from tf.transformations import quaternion_from_euler
 from hiro_core.XamyabRobot import XamyabRobot, rospy
 from collections import deque
 import random
+import classify_shape
+import cv2 
+import numpy as np
 
 class MovingPieces:
     def __init__(self):
+        self.img_list = range(25)
+        self.cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         self.robot = XamyabRobot(visualize_trajectory=True)
         self.default_gripper_quaternion = Quaternion(*quaternion_from_euler(pi, 0, pi/2))
         self.viewing_gripper_quaternion = Quaternion(*quaternion_from_euler(-pi/2, 0, pi/2))
@@ -51,8 +56,11 @@ class MovingPieces:
         pose = Pose(position=Point(*transform_point))
         return pose
     def identify_shape(self):
-        #Krishna's code does this
-        return random.randint(0,24)
+        
+        ret, frame = self.cam.read()
+        predicted_shape = classify_shape.classify(frame)
+        self.img_list.pop(predicted_shape[.0])
+        return predicted_shape
     def pick_final_square_pose(self, index):
         bottom_right_corner_square = [0.7, -0.3, 0.4]
         list_points = []
