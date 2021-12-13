@@ -1,14 +1,13 @@
 import classify_shape
-
 import cv2 
 import numpy as np
 
-cam = cv2.VideoCapture(0)
+cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 # frame = cv2.imread('game_pieces.jpg')
 prev_shape = 1
 while(1):
     ret, frame = cam.read()
-    predicted_shape = classify_shape.classify(frame)
+    predicted_shape = classify_shape.classify(frame, range(25))
     if predicted_shape[0] != prev_shape:
         predicted_shape_picture = cv2.imread('shapes/piece_{}.png'.format(predicted_shape[0]))
         prev_shape = predicted_shape[0]
