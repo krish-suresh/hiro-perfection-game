@@ -72,12 +72,12 @@ def rotate_contour(cnt, angle):
 # quit()
 
 def classify(input, img_list):
-    degree_increment = 10
+    degree_increment = 3
     best_fit_test = (0,0) # (shape_num, deg)
     max_iou = 0
     for i in img_list:
         test_image = cv2.imread('shapes/piece_{}.png'.format(i))
-        for deg in np.linspace(0,360, degree_increment):
+        for deg in np.linspace(-180,180, degree_increment):
             iou = intersection_over_union(input, test_image, deg)
             if  iou > max_iou:
                 best_fit_test = (i,deg)

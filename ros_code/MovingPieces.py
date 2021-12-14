@@ -2,7 +2,7 @@ from math import pi
 from geometry_msgs.msg import Pose, Point, Quaternion
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from hiro_core.XamyabRobot import XamyabRobot, rospy
-from collections import deque
+from collections import deque, Counter
 import random
 import classify_shape
 import cv2 
@@ -62,10 +62,15 @@ class MovingPieces:
         pose = Pose(position=Point(*top_right_corner_square), orientation=self.default_gripper_quaternion)
         return pose 
     def identify_shape(self):
-        ret, frame = self.cam.read()
-        predicted_shape = classify_shape.classify(frame)
-        self.img_list.pop(predicted_shape[.0])
+        predicted_shapes = []
+        for i in range(10):
+            ret, frame = self.cam.read()
+            predicted_shapes.append(classify_shape.classify(frame, self.img_list))
+        occurence_count = Counter(predicted_shapes)
+        predicted_shape = occurence_count.most_common(1)[0][0]
+        self.img_list.pop(predicted_shape[0])
         return predicted_shape
+
     def move_to_cv(self):
         transform_point = [0.55, -0.15, 0.4]
         pose_goal  = Pose(position = Point(*transform_point))
