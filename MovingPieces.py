@@ -17,6 +17,8 @@ class MovingPieces:
         self.start_pos = Pose(position=Point(*[0.6256, 0, 0.4]), orientation=self.default_gripper_quaternion)
         self.place_height = 0.3
         self.pick_height = 0.265
+        self.cam = cv2.VideoCapture(0)
+        self.img_list = range(25)
     def run(self, j):
         rospy.loginfo("PROJECT READY")
         for i in range(0,j):
@@ -67,6 +69,7 @@ class MovingPieces:
         for i in range(10):
             ret, frame = self.cam.read()
             predicted_shapes.append(classify_shape.classify(frame, self.img_list))
+        print(predicted_shapes)
         occurence_count = Counter(predicted_shapes)
         predicted_shape = occurence_count.most_common(1)[0][0]
         self.img_list.pop(predicted_shape[0])
@@ -113,5 +116,11 @@ if __name__ == '__main__':
     #     piece = project.identify_shape()
     #     project.place_piece(piece)
 
-    project.place_piece((0,pi/4)) # Test placing piece
+    # project.pick_piece(0)
+    project.move_to_cv()
+    piece = project.identify_shape()
+    print(piece)
+    # piece = (0,pi/4) #project.identify_shape()
+    # project.place_piece(piece)
+    sys.exit()
     # project.current_pos()
