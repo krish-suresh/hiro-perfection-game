@@ -4,6 +4,7 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from hiro_core.XamyabRobot import XamyabRobot, rospy
 from collections import deque, Counter
 import random
+import sys
 import classify_shape
 import cv2 
 import numpy as np
