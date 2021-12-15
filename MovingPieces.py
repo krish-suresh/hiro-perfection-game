@@ -1,4 +1,4 @@
-from math import pi
+from math import pi, radians
 from geometry_msgs.msg import Pose, Point, Quaternion
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from hiro_core.XamyabRobot import XamyabRobot, rospy
@@ -17,7 +17,11 @@ class MovingPieces:
         self.start_pos = Pose(position=Point(*[0.6256, 0, 0.4]), orientation=self.default_gripper_quaternion)
         self.place_height = 0.3
         self.pick_height = 0.265
-        self.cam = cv2.VideoCapture(0)
+        self.cam = cv2.VideoCapture(1)
+        self.cam.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+        focus = 100
+        self.cam.set(28, focus) 
+        ret, frame = self.cam.read()
         self.img_list = range(25)
     def run(self, j):
         rospy.loginfo("PROJECT READY")
@@ -66,14 +70,14 @@ class MovingPieces:
         return pose 
     def identify_shape(self):
         predicted_shapes = []
-        for i in range(10):
+        for i in range(5):
             ret, frame = self.cam.read()
             predicted_shapes.append(classify_shape.classify(frame, self.img_list))
-        print(predicted_shapes)
+        # print(predicted_shapes)
         occurence_count = Counter(predicted_shapes)
         predicted_shape = occurence_count.most_common(1)[0][0]
         self.img_list.pop(predicted_shape[0])
-        return predicted_shape
+        return (predicted_shape[0], radians(predicted_shape[1]))
 
     def move_to_cv(self):
         transform_point = [0.55, -0.15, 0.4]
@@ -114,13 +118,15 @@ if __name__ == '__main__':
     #     project.pick_piece(i)
     #     project.move_to_cv()
     #     piece = project.identify_shape()
+    #     print(piece)
     #     project.place_piece(piece)
 
-    # project.pick_piece(0)
+    project.pick_piece(12)
     project.move_to_cv()
-    piece = project.identify_shape()
-    print(piece)
+    # piece = project.identify_shape()
     # piece = (0,pi/4) #project.identify_shape()
     # project.place_piece(piece)
+    project.cam.release()
     sys.exit()
+    
     # project.current_pos()

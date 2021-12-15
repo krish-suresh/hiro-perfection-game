@@ -7,7 +7,7 @@ def mask_largest_contour(input, hsv_low, hsv_high, rotation=0):
     hsv = cv2.cvtColor(input_blur, cv2.COLOR_BGR2HSV)
     mask_all = cv2.inRange(hsv, hsv_low, hsv_high)
     ret,thresh = cv2.threshold(mask_all, 40, 255, 0)
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[1]
     mask = np.zeros(input.shape[0:2], np.uint8)
     if len(contours) != 0:
         c = max(contours, key = cv2.contourArea)
@@ -25,8 +25,8 @@ def mask_largest_contour(input, hsv_low, hsv_high, rotation=0):
 def intersection_over_union(input, test, input_rotation):
     lower_yellow = np.array([0,50,50])
     upper_yellow = np.array([50, 255, 255])
-    lower_yellow_cam = np.array([15,150,50])
-    upper_yellow_cam = np.array([50, 255, 200])
+    lower_yellow_cam = np.array([15,100,50])
+    upper_yellow_cam = np.array([50, 255, 255])
     input_mask = mask_largest_contour(input,lower_yellow_cam, upper_yellow_cam, rotation=input_rotation)
     test_mask = mask_largest_contour(test,lower_yellow, upper_yellow)
     input_mask = cv2.resize(input_mask, test_mask.shape, interpolation = cv2.INTER_AREA)
@@ -72,12 +72,12 @@ def rotate_contour(cnt, angle):
 # quit()
 
 def classify(input, img_list):
-    degree_increment = 3
+    degree_increment = 5
     best_fit_test = (0,0) # (shape_num, deg)
     max_iou = 0
     for i in img_list:
         test_image = cv2.imread('shapes/piece_{}.png'.format(i))
-        for deg in np.linspace(-180,180, degree_increment):
+        for deg in np.linspace(0,180, degree_increment):
             iou = intersection_over_union(input, test_image, deg)
             if  iou > max_iou:
                 best_fit_test = (i,deg)
