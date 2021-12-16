@@ -8,6 +8,7 @@ import sys
 import classify_shape
 import cv2 
 import numpy as np
+import time
 
 class MovingPieces:
     def __init__(self):
@@ -16,7 +17,9 @@ class MovingPieces:
         self.viewing_gripper_quaternion = Quaternion(*quaternion_from_euler(pi, 0, 0))
         self.start_pos = Pose(position=Point(*[0.6256, 0, 0.4]), orientation=self.default_gripper_quaternion)
         self.place_height = 0.3
-        self.pick_height = 0.265
+        self.pick_height = 0.27
+        self.increment_spacing_x = 0.033
+        self.increment_spacing_y = 0.033
         self.cam = cv2.VideoCapture(1)
         self.cam.set(cv2.CAP_PROP_AUTOFOCUS, 0)
         focus = 100
@@ -56,27 +59,27 @@ class MovingPieces:
         rospy.sleep(1)
     def pick_square_piece_pose(self, index):
         top_right_corner_square = [0.67, -0.25, 0.4]
-        top_right_corner_square[0] = top_right_corner_square[0]-0.03*(index/5)
-        top_right_corner_square[1] = top_right_corner_square[1]-0.03*(index%5)
+        top_right_corner_square[0] = top_right_corner_square[0]-self.increment_spacing_x*(index/5)
+        top_right_corner_square[1] = top_right_corner_square[1]-self.increment_spacing_y*(index%5)
         print("Pick Pose: {}".format(top_right_corner_square))
         pose = Pose(position=Point(*top_right_corner_square))
         return pose
     def place_square_piece_pose(self, index):
-        top_right_corner_square = [0.66, 0.07, 0.4]
-        top_right_corner_square[0] = top_right_corner_square[0]-0.03*(index/5)
-        top_right_corner_square[1] = top_right_corner_square[1]-0.03*(index%5)
+        top_right_corner_square = [0.66, 0.1, 0.4]
+        top_right_corner_square[0] = top_right_corner_square[0]-self.increment_spacing_x*(index/5)
+        top_right_corner_square[1] = top_right_corner_square[1]-self.increment_spacing_y*(index%5)
         print("Place Pose: {}".format(top_right_corner_square))
         pose = Pose(position=Point(*top_right_corner_square), orientation=self.default_gripper_quaternion)
         return pose 
     def identify_shape(self):
-        predicted_shapes = []
+        predicted_shape = None
         for i in range(5):
             ret, frame = self.cam.read()
-            predicted_shapes.append(classify_shape.classify(frame, self.img_list))
+            predicted_shape =classify_shape.classify(frame, self.img_list)
         # print(predicted_shapes)
-        occurence_count = Counter(predicted_shapes)
-        predicted_shape = occurence_count.most_common(1)[0][0]
-        self.img_list.pop(predicted_shape[0])
+        # occurence_count = Counter(predicted_shapes)
+        # predicted_shape = occurence_count.most_common(1)[0][0]
+        self.img_list.remove(predicted_shape[0])
         return (predicted_shape[0], radians(predicted_shape[1]))
 
     def move_to_cv(self):
@@ -114,19 +117,46 @@ class MovingPieces:
         self.move_to(pose)
 if __name__ == '__main__':
     project = MovingPieces()
-    # for i in range(25):
-    #     project.pick_piece(i)
-    #     project.move_to_cv()
-    #     piece = project.identify_shape()
-    #     print(piece)
-    #     project.place_piece(piece)
 
-    project.pick_piece(12)
-    project.move_to_cv()
+    # shape_number = 0
+    # cam = cv2.VideoCapture(1)
+    # cam.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+    # time.sleep(1)
+    # focus = 20
+    # cam.set(28, focus)
+    project.place_piece((0,0)) 
+    raw_input('start?')
+    for i in range(25):
+        project.pick_piece(i)
+        project.move_to_cv()
+        piece = project.identify_shape()
+        print(piece)
+        project.place_piece(piece)
+    #     while(1):
+    #         _, frame = cam.read()
+    #         cv2.imshow("frame", frame)
+    #         k = cv2.waitKey(1)
+    #         if k%256 == 97:
+    #             cv2.imwrite("shapes_update/piece_{}.png".format(shape_number), frame)
+    #             shape_number+=1
+    #             print(shape_number)
+    #             project.robot.right_gripper.set_value(90)
+    #             break
+    #         if k%256== 27:
+    #             break
+    # cam.release()
+    # cv2.destroyAllWindows()
+    # project.pick_piece(12)
+    # project.move_to_cv()
     # piece = project.identify_shape()
     # piece = (0,pi/4) #project.identify_shape()
     # project.place_piece(piece)
-    project.cam.release()
+    # while True:
+    #     x = raw_input('open')
+    #     project.robot.right_gripper.set_value(90)
+    #     x = raw_input('close')
+    #     project.robot.right_gripper.close()
+    # project.cam.release()
     sys.exit()
     
     # project.current_pos()

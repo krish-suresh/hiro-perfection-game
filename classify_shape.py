@@ -32,7 +32,7 @@ def intersection_over_union(input, test, input_rotation):
     input_mask = cv2.resize(input_mask, test_mask.shape, interpolation = cv2.INTER_AREA)
     intersection = cv2.bitwise_and(input_mask,test_mask)
     union = cv2.bitwise_or(input_mask,test_mask)
-    return float(cv2.countNonZero(intersection))/float(cv2.countNonZero(union))
+    return float(cv2.countNonZero(intersection))/float(cv2.countNonZero(union)), input_mask, test_mask
 
 def cart2pol(x, y):
     theta = np.arctan2(y, x)
@@ -72,16 +72,24 @@ def rotate_contour(cnt, angle):
 # quit()
 
 def classify(input, img_list):
-    degree_increment = 5
+    degree_increment = 10
     best_fit_test = (0,0) # (shape_num, deg)
     max_iou = 0
+    best_mask_input = None
+    best_mask_test = None
     for i in img_list:
-        test_image = cv2.imread('shapes/piece_{}.png'.format(i))
+        test_image = cv2.imread('shapes_update/piece_{}.png'.format(i))
         for deg in np.linspace(0,180, degree_increment):
-            iou = intersection_over_union(input, test_image, deg)
+            iou, mask_input, mask_test = intersection_over_union(input, test_image, deg)
             if  iou > max_iou:
                 best_fit_test = (i,deg)
                 max_iou = iou
+                best_mask_input = mask_input
+                best_mask_test = mask_test
+
+    if best_mask_input is not None and best_mask_test is not None:
+        cv2.imshow('best_mask_input', best_mask_input)
+        cv2.imshow('best_mask_test', best_mask_test)
     return best_fit_test
 
 # input = cv2.imread('piece_13_rot.png')

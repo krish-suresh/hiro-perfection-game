@@ -28,7 +28,7 @@ while(1):
     input_mask = classify_shape.mask_largest_contour(frame,lower_yellow_cam, upper_yellow_cam)
     predicted_shape = classify_shape.classify(frame, range(25))
     if predicted_shape[0] != prev_shape:
-        predicted_shape_picture = cv2.imread('shapes/piece_{}.png'.format(predicted_shape[0]))
+        predicted_shape_picture = cv2.imread('shapes_update/piece_{}.png'.format(predicted_shape[0]))
         prev_shape = predicted_shape[0]
         print("Piece {} rotated by {} degrees".format(predicted_shape[0],predicted_shape[1]))
     cv2.imshow('frame',frame)
